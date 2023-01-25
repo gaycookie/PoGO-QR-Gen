@@ -1,0 +1,182 @@
+---
+---
+
+<style>
+  option.instinct {
+    background-color: #FFFF00;
+    color: #000;
+  }
+
+  option.mystic {
+    background-color: #0000FF;
+    color: #FFF;
+  }
+
+  option.valor {
+    background-color: #FF0000;
+    color: #000;
+  }
+</style>
+
+<form id="form" class="row border-top g-4 needs-validation" novalidate>
+  <div class="col-md-6">
+    <h3>Player Information</h3>
+
+    <div class="mb-3">
+      <label for="code-input" class="form-label">Invite Code <span class="text-danger">*</span></label>
+      <input type="text" id="code-input" class="form-control masked" placeholder="0000 0000 0000" />
+      <div id="code-input-feedback" class="invalid-feedback">
+        Please provide a valid invite code: <code>0000 0000 0000</code>.
+      </div>
+    </div>
+    
+    <div class="mb-3">
+      <label for="username-input" class="form-label">Username</label>
+      <input type="text" id="username-input" class="form-control" maxlength="12" placeholder="Username" disabled />
+      <div id="username-input-feedback" class="invalid-feedback">
+        Please provide a valid username. If you think this error is incorrect please contact me.
+      </div>
+    </div>
+
+    <div>
+      <label for="team-select" class="form-label">Team</label>
+      <select id="team-select" class="form-select" aria-label="Team">
+        <option value="none" selected>No team (default)</option>
+        <option value="instinct" class="instinct">Team Instinct</option>
+        <option value="mystic" class="mystic">Team Mystic</option>
+        <option value="valor" class="valor">Team Valor</option>
+      </select>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <h3>QR Options</h3>
+
+    <div class="mb-3">
+      <label for="dot-select" class="form-label">Dot Style</label>
+      <select id="dot-select" class="form-select" aria-label="Dot Style">
+        <option value="sqaure" selected>Sqaures (default)</option>
+        <option value="rounded">Rounded</option>
+        <option value="extra-rounded">Extra Rounded</option>
+        <option value="dots">Dots (not recommended)</option>
+        <option value="classy">Classy</option>
+        <option value="classy-rounded">Classy Rounded</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="frame-select" class="form-label">Frame Style</label>
+      <select id="frame-select" class="form-select" aria-label="Frame Select">
+        <option value="simple" selected>No Pokemon (default)</option>
+        <option value="articuno">Articuno (Team Mystic)</option>
+        <option value="moltres">Moltes (Team Valor)</option>
+        <option value="zapdos">Zapdos (Team Instinct)</option>
+        <option value="" disabled>More coming soon!</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="correction-select" class="form-label">QR Correction Level <span class="text-warning">(advanced)</span></label>
+      <select id="correction-select" class="form-select" aria-label="QR Correction Level">
+        <option value="L" selected>Level L</option>
+        <option value="M">Level M</option>
+        <option value="Q">LeveL Q</option>
+        <option value="H">Level H</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="col-12 text-md-end text-center">
+    <div class="btn-group" role="group">
+      <button class="btn btn-success px-4" type="submit">Generate QR</button>
+      <button class="btn btn-danger px-4" type="reset">Reset Fields</button>
+    </div>
+  </div>
+</form>
+
+<script lang="js">
+  let hasErrors = false;
+
+  function resetForm() {
+    const inputs = document.querySelectorAll("input, select");
+    hasErrors = false;
+
+    for (let i = 0; i < inputs.length; i++) {
+      inputs[i].classList.remove("is-invalid");
+    }
+  }
+
+  function maskerInput(event) {
+    const input = event.target;
+    let value = input.value;
+
+    value = value.replace(/[^0-9]/g, "");
+    if (value.length > 12) value = value.substring(0, 12);
+
+    let maskedValue = "";
+    for (let i = 0; i < value.length; i++) {
+      if (i % 4 == 0 && i != 0 && i + 1 != value.length) {
+        maskedValue += " ";
+      }
+    
+      maskedValue += value.charAt(i);
+    }
+
+    input.value = maskedValue;
+  }
+
+  function submitForm(event) {
+    event.preventDefault();
+    resetForm();
+
+    const codeInput = document.querySelector("#code-input");
+    const usernameInput = document.querySelector("#username-input");
+    const teamSelect = document.querySelector("#team-select");
+    const dotStyleSelect = document.querySelector("#dot-select");
+    const frameStyleSelect = document.querySelector("#frame-select");
+    const correctionSelect = document.querySelector("#correction-select");
+
+    if (!codeInput || !usernameInput || !teamSelect || !dotStyleSelect || !frameStyleSelect || !correctionSelect) {
+      hasErrors = true;
+    }
+
+    const code = codeInput.value.replace(/[^0-9]/g, "");
+    if (!code || code.length != 12) {
+      hasErrors = true; 
+      codeInput.classList.add("is-invalid");
+    }
+
+    const team = teamSelect.value;
+    if (!team) {
+      hasErrors = true; 
+      teamSelect.classList.add("is-invalid");
+    }
+
+    const dotStyle = dotStyleSelect.value;
+    if (!dotStyle) {
+      hasErrors = true; 
+      dotStyleSelect.classList.add("is-invalid");
+    }
+
+    const frameStyle = frameStyleSelect.value;
+    if (!frameStyle) {
+      hasErrors = true; 
+      frameStyleSelect.classList.add("is-invalid");
+    }
+
+    const level = correctionSelect.value;
+    if (!level) {
+      hasErrors = true; 
+      correctionSelect.classList.add("is-invalid");
+    }
+
+    if (hasErrors) return;
+    canvas.dispatchEvent(new CustomEvent("drawCustom", { detail: {
+      code, team, dotStyle, frameStyle, level
+    } } ));
+  }
+
+  document.querySelector("#form").addEventListener("submit", submitForm);
+  document.querySelector("#form").addEventListener("reset", resetForm);
+  document.querySelector("#code-input").addEventListener("change", maskerInput);
+  document.querySelector("#code-input").addEventListener("input", maskerInput);
+</script>

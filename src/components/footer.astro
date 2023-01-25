@@ -1,0 +1,33 @@
+---
+const currentYear = new Date().getFullYear();
+
+const urls = [{
+    text: "Source",
+    url: "https://github.com/gaycookie/pogo-qr-gen"
+  }, {
+    text: "Issues",
+    url: "https://github.com/gaycookie/pogo-qr-gen/issues"
+  }, {
+    text: "FAQs",
+    url: "#"
+  }
+];
+---
+
+<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+  <p class="col-md-7 mb-0 text-muted">
+    <span style="display: block;">
+      © { currentYear } <a href="https://github.com/gaycookie" target="_blank" class="text-reset text-decoration-none">GayCookie</a>, made with lots of ❤ and ☕.
+    </span>
+    <span style="display: block;">
+      Not affiliated with Niantic Inc., The Pokemon Company or Nintendo
+    </span>
+  </p>
+  <ul class="nav col-md-5 justify-content-end">
+    { urls.map(url => (
+      <li class="nav-item">
+        <a href={ url.url } target="_blank" class="nav-link px-2 text-muted">{ url.text }</a>
+      </li>      
+    )) }
+  </ul>
+</footer>

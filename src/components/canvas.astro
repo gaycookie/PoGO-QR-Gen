@@ -1,0 +1,104 @@
+---
+---
+
+<style>
+  .qr-canvas {
+    border-radius: 10px;
+    width: 256px;
+    height: 256px;
+    max-width: 512px;
+    max-height: 512px;
+  }
+
+  .qr-canvas:hover {
+    cursor: pointer;
+  }
+</style>
+
+<div class="d-flex justify-content-center pb-5">
+  <canvas width="512" height="512" class="qr-canvas"></canvas>
+</div>
+
+<script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+<script lang="js">
+  const teams = {
+    none: { color: "#000000" },
+    instinct: { color: "#FFDE00" },
+    mystic: { color: "#3B4CCA" },
+    valor: { color: "#CC0000" }
+  }
+
+  let isExpanded = false;
+
+  function resize(event) {
+    const el = event.target;
+
+    el.style.width = isExpanded ? "256px" : "100%";
+    el.style.height = isExpanded ? "256px" : "100%";
+    isExpanded = !isExpanded;
+  }
+
+  async function drawImage(ctx, image, ...args) {
+    return new Promise((resolve, reject) => {
+      image.onload = () => resolve(ctx.drawImage(image, ...args));
+      image.onerror = reject;
+    });
+  }
+
+  async function drawPlaceholder(event) {
+    const canvas = event.target;
+    const ctx = canvas.getContext("2d");
+    const [width, height] = [512, 512];
+
+    if (!ctx) return;
+    
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, width, height);
+
+    const image = new Image();
+    image.src = "img/qr/placeholder.png";
+
+    await drawImage(ctx, image, 0, 0, width, height);
+  }
+
+  async function drawCustom(event) {
+    const canvas = event.target;
+    const ctx = canvas.getContext("2d");
+    const options = event.detail;
+    const [width, height] = [512, 512];
+
+    if (!ctx) return;
+
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, width, height);
+
+    let color = teams['none'].color;
+    if (options.team && options.team != 'none') {
+      color = teams[options.team].color;
+    }
+
+    const qrCode = new QRCodeStyling({
+      type: 'canvas',
+      width: width,
+      height: height,
+      data: options.code,
+      cornersSquareOptions: { color: color },
+      cornersDotOptions: { color: '#000000' },
+      qrOptions: { errorCorrectionLevel: options.level },
+      dotsOptions: { type: options.dotStyle, color: "#000000" },
+    });
+    ctx.drawImage(qrCode._canvas._canvas, 64, 64, width - 128, height - 128);
+
+    const frameImage = new Image();
+    if (options.frameStyle) {
+      frameImage.src = `img/qr/frames/${options.frameStyle}.png`;
+      await drawImage(ctx, frameImage, 0, 0, width, height);
+    }
+  }
+
+  const canvas = document.querySelector(".qr-canvas");
+  canvas.addEventListener("click", resize);
+  canvas.addEventListener("drawPlaceholder", drawPlaceholder);
+  canvas.addEventListener("drawCustom", drawCustom);
+  canvas.dispatchEvent(new Event("drawPlaceholder"));
+</script>
